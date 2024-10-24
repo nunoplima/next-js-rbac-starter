@@ -1,4 +1,4 @@
-import { prisma } from '@/prisma'
+import { prisma } from '@/@lib/db'
 import { PrismaAdapter } from '@auth/prisma-adapter'
 import type {
   GetServerSidePropsContext,
@@ -23,6 +23,18 @@ export const authOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
   ],
+  callbacks: {
+    session({ session, token }) {
+      if (session?.user) session.user.role = token.role
+      console.log({ session, token })
+      return session
+    },
+    jwt({ token, user }) {
+      console.log({ token, user })
+      if (user) token.role = user.role
+      return token
+    },
+  },
   session: {
     strategy: 'jwt',
   },
